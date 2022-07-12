@@ -11,6 +11,9 @@ class Enterprise {
     this.ceo_id = ceo_id;
   }
 
+  public String getCeo_Id() {
+    return ceo_id;
+  }
 
   public String toString() {
     return "Enterprise_" + name;
