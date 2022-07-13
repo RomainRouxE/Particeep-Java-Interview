@@ -22,6 +22,11 @@ class AsyncTest {
       new Ceo("ceo_3", "Bill"));
 
   public static CompletableFuture<String> getCeoById(String ceo_id) throws Exception {
+    // Create new ceo with ceo_id only / loop on every ither ceo to see if any match
+    // the given one.
+    // If match found return the ceo.toString() as a completableFuture else return
+    // none
+
     Ceo test = new Ceo(ceo_id, null);
     CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
@@ -36,6 +41,12 @@ class AsyncTest {
   }
 
   public static CompletableFuture<String> getEnterpriseByCeoId(String ceo_id) {
+    // Create new entreprise with ceo_id only / loop on every ither ceo to see if
+    // any match
+    // the given one.
+    // If match found return the entreprise.toString() as a completableFuture else
+    // return none
+
     Enterprise test = new Enterprise(null, null, ceo_id);
     CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
@@ -49,21 +60,29 @@ class AsyncTest {
     return completableFuture;
   }
 
-  public static CompletableFuture<Tuple2<Option<Ceo>, Option<Enterprise>>> getCEOAndEnterprise(String ceo_id)
+  public static CompletableFuture<Tuple2<Option<String>, Option<String>>> getCEOAndEnterprise(String ceo_id)
       throws Exception {
     CompletableFuture<String> ceoById = getCeoById(ceo_id);
     CompletableFuture<String> entrepriseById = getEnterpriseByCeoId(ceo_id);
 
     String resultCeo = ceoById.get();
-    System.out.println(resultCeo);
+    // System.out.println(resultCeo);
 
     String resultEntr = entrepriseById.get();
-    System.out.println(resultEntr);
+    // System.out.println(resultEntr);
 
-    Tuple2<String, String> test = Tuple.of(resultCeo, resultEntr);
-    String s = test._1;
-    System.out.println(s);
-
-    return null;
+    // lot of if/else if to manage the 4 cases
+    if (resultCeo.equals("none") && resultEntr.equals("none"))
+      return CompletableFuture.allOf(ceoById, entrepriseById)
+          .thenApply(ignoredVoid -> Tuple.of(Option.none(), Option.none()));
+    else if (resultCeo.equals("none") && !resultEntr.equals("none"))
+      return CompletableFuture.allOf(ceoById, entrepriseById)
+          .thenApply(ignoredVoid -> Tuple.of(Option.none(), Option.of(entrepriseById.join())));
+    else if (!resultCeo.equals("none") && resultEntr.equals("none"))
+      return CompletableFuture.allOf(ceoById, entrepriseById)
+          .thenApply(ignoredVoid -> Tuple.of(Option.of(ceoById.join()), Option.none()));
+    else
+      return CompletableFuture.allOf(ceoById, entrepriseById)
+          .thenApply(ignoredVoid -> Tuple.of(Option.of(ceoById.join()), Option.of(entrepriseById.join())));
   }
 }
